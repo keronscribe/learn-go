@@ -1,0 +1,71 @@
+/* 指定使用的是 proto3 的語法 */
+/* https://developers.google.com/protocol-buffers/docs/proto3?hl=en#simple */
+
+syntax = 'proto3';
+
+option go_package = "github.com/keronscribe/learn-go/grpc/route";
+/* option 不會改變聲明的整體含義，但可能會影響它在特定上下文中的處理方式 */
+
+package route;
+
+/*
+- 定義四種不同類型的信息
+    - Point：點
+    - Rectangle：範圍
+    - Feature：相關訊息
+    - RouteSummary：總結
+*/
+
+message Point {
+    int32 latitude = 1; // 把一個數字作為key使用，可以壓縮長度。要從 1 開始。
+    int32 longitude = 2;
+}
+
+message Rectangle {
+    Point lo = 1;
+    Point hi = 2;
+}
+
+message Feature {
+    string name = 1;
+    Point location = 2;
+}
+
+message RouteSummary {
+    int32 point_count = 1;
+    int32 distance = 2;
+    int32 elapsed_time = 3;
+}
+
+enum RecommendationMode {
+    GetFarthest = 0;
+    GetNearest = 1;
+}
+
+message Recommendation {
+    RecommendationMode mode = 1;
+    Point point = 2;
+}
+
+/*
+- 定義四種方法：
+    - GetFeature(輸入一個 point，返回這個點的 Feature)
+    - ListFeature(輸入一個 Rectangle ，輸出流這個點的所有Feature)
+    - RecordRoute(輸入流為每個時間點的位址Point ，返回一個 RouteSummary)
+    - Recommend(輸入流Recommendation ，輸出流  Feature)
+*/
+
+service RouteGuide {
+    // Unary
+    rpc GetFeature(Point) returns (Feature) {}
+
+    //Client-side Streaming
+    rpc ListFeature(Rectangle) returns (stream Feature) {}
+
+    //Client-side Streaming
+    rpc RecordRoute(stream Point) returns (RouteSummary) {}
+
+    // bidirectional Streaming
+    rpc Recommend(stream Point) returns (stream Feature) {}
+
+}
