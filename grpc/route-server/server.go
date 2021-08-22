@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
+
+	"google.golang.org/protobuf/proto"
 
 	pb "github.com/keronscribe/learn-go/grpc/route"
 	"google.golang.org/grpc"
@@ -17,7 +18,6 @@ type routeGuideServer struct {
 	// 所以必須要在這裡有這個東西
 	features                         []*pb.Feature // DB 要是一個裏面是 feature 的 Slice
 	pb.UnimplementedRouteGuideServer               //內嵌進來
-
 }
 
 // 實現 RouteGuideServer 的方法
