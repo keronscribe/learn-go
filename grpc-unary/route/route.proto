@@ -1,0 +1,22 @@
+/* 指定使用的是 proto3 的語法 */
+
+syntax = 'proto3';
+
+option go_package = "github.com/keronscribe/learn-go/grpc-unary/route";
+
+package route;
+
+message Point {
+    int32 latitude = 1; // 把一個數字作為key使用，可以壓縮長度。要從 1 開始。
+    int32 longitude = 2;
+}
+
+message Feature {
+    string name = 1;
+    Point location = 2;
+}
+
+service RouteGuide {
+    // Unary
+    rpc GetFeature(Point) returns (Feature) {}
+}
