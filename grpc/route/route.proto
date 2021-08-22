@@ -60,7 +60,7 @@ service RouteGuide {
     rpc GetFeature(Point) returns (Feature) {}
 
     //Client-side Streaming
-    rpc ListFeature(Rectangle) returns (stream Feature) {}
+    rpc ListFeatures(Rectangle) returns (stream Feature) {}
 
     //Client-side Streaming
     rpc RecordRoute(stream Point) returns (RouteSummary) {}

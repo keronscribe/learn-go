@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
-	"google.golang.org/protobuf/proto"
 	"log"
+	"math"
 	"net"
+
+	"google.golang.org/protobuf/proto"
 
 	pb "github.com/keronscribe/learn-go/grpc/route"
 	"google.golang.org/grpc"
@@ -17,7 +19,6 @@ type routeGuideServer struct {
 	// 所以必須要在這裡有這個東西
 	features                         []*pb.Feature // DB 要是一個裏面是 feature 的 Slice
 	pb.UnimplementedRouteGuideServer               //內嵌進來
-
 }
 
 // 實現 RouteGuideServer 的方法
@@ -34,8 +35,36 @@ func (s *routeGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 	return nil, nil
 }
 
-// Client-side Streaming
-func (s *routeGuideServer) ListFeature(*pb.Rectangle, pb.RouteGuide_ListFeatureServer) error {
+func inRange(point *pb.Point, rect *pb.Rectangle) bool {
+	left := math.Min(float64(rect.Lo.Longitude), float64(rect.Hi.Longitude))
+	right := math.Max(float64(rect.Lo.Longitude), float64(rect.Hi.Longitude))
+	top := math.Max(float64(rect.Lo.Latitude), float64(rect.Hi.Latitude))
+	bottom := math.Min(float64(rect.Lo.Latitude), float64(rect.Hi.Latitude))
+
+	if float64(point.Longitude) >= left &&
+		float64(point.Longitude) <= right &&
+		float64(point.Latitude) >= bottom &&
+		float64(point.Latitude) <= top {
+		log.Println("true")
+		return true
+	}
+	return false
+}
+
+
+// Server-side Streaming
+func (s *routeGuideServer) ListFeatures(rectangle *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
+		for _, feature := range s.features {
+		if inRange(feature.Location, rectangle) {
+			//log.Println(feature.Location)
+			// if feature 的 Location 在 rect 裏面
+			// stream 是一個通道，連結前後端。
+			// 現在是 Server 端要回傳給客戶端
+			if err := stream.Send(feature); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
